@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="da">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Stroke Risiko Tjek</title>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: linear-gradient(to right, #f8f9fa, #e3f2fd);
+        padding: 30px;
+        color: #333;
+        max-width: 600px;
+        margin: auto;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+      }
+
+      h2 {
+        text-align: center;
+        color: #007bff;
+      }
+
+      form label {
+        display: block;
+        margin: 12px 0 4px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      button {
+        margin-top: 20px;
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        background-color: #007bff;
+        border: none;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      #result {
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .high-risk {
+        color: #dc3545;
+      }
+
+      .low-risk {
+        color: #28a745;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Stroke Risiko Tjek</h2>
+    <form id="strokeForm">
+      <label>Alder:</label>
+      <input type="number" name="age" required />
+
+      <label>Glukose-niveau:</label>
+      <input type="number" step="any" name="avg_glucose_level" required />
+
+      <label>BMI:</label>
+      <input type="number" step="any" name="bmi" required />
+
+      <label>Køn:</label>
+      <select name="gender">
+        <option value="Male">Mand</option>
+        <option value="Female">Kvinde</option>
+        <option value="Other">Andet</option>
+      </select>
+
+      <label>Hypertension:</label>
+      <select name="hypertension">
+        <option value="0">Nej</option>
+        <option value="1">Ja</option>
+      </select>
+
+      <label>Hjertesygdom:</label>
+      <select name="heart_disease">
+        <option value="0">Nej</option>
+        <option value="1">Ja</option>
+      </select>
+
+      <label>Gift:</label>
+      <select name="ever_married">
+        <option value="Yes">Ja</option>
+        <option value="No">Nej</option>
+      </select>
+
+      <label>Arbejdstype:</label>
+      <select name="work_type">
+        <option value="Private">Private</option>
+        <option value="Self-employed">Self-employed</option>
+        <option value="Govt_job">Govt_job</option>
+        <option value="children">children</option>
+        <option value="Never_worked">Never_worked</option>
+      </select>
+
+      <label>Bopælstype:</label>
+      <select name="Residence_type">
+        <option value="Urban">Urban</option>
+        <option value="Rural">Rural</option>
+      </select>
+
+      <label>Rygevaner:</label>
+      <select name="smoking_status">
+        <option value="never smoked">Aldrig røget</option>
+        <option value="formerly smoked">Tidligere ryger</option>
+        <option value="smokes">Ryger</option>
+        <option value="Unknown">Ukendt</option>
+      </select>
+
+      <button type="submit">Tjek risiko</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+      document
+        .getElementById("strokeForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const form = e.target;
+          const data = {
+            age: parseFloat(form.age.value),
+            avg_glucose_level: parseFloat(form.avg_glucose_level.value),
+            bmi: parseFloat(form.bmi.value),
+            gender: form.gender.value,
+            hypertension: parseInt(form.hypertension.value),
+            heart_disease: parseInt(form.heart_disease.value),
+            ever_married: form.ever_married.value,
+            work_type: form.work_type.value,
+            Residence_type: form.Residence_type.value,
+            smoking_status: form.smoking_status.value,
+          };
+
+          try {
+            const res = await fetch("http://localhost:5000/predict", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
+            });
+
+            const result = await res.json();
+            const resultBox = document.getElementById("result");
+            if (result.stroke_risk === 1) {
+              resultBox.innerHTML =
+                "<span class='high-risk'>Høj risiko for stroke</span>";
+            } else {
+              resultBox.innerHTML =
+                "<span class='low-risk'>Lav risiko for stroke</span>";
+            }
+          } catch (err) {
+            document.getElementById("result").innerText = "Server fejl.";
+          }
+        });
+    </script>
+  </body>
+</html>
